@@ -123,6 +123,12 @@ export interface BurnLstArgs extends MaybeTx {
   blizzardStaking: SharedObject;
 }
 
+export interface TransmuteArgs extends MaybeTx {
+  withdrawIXs: NestedResult;
+  fromBlizzardStaking: SharedObject;
+  fromCoin: OwnedObject;
+}
+
 export interface AddNodeArgs extends MaybeTx {
   nodeId: string;
   blizzardStaking: SharedObject;

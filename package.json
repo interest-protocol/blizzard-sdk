@@ -15,7 +15,7 @@
       "types": "./dist/blizzard/index.d.ts"
     }
   },
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "blizzard sdk",
   "publishConfig": {
     "access": "public"
@@ -54,7 +54,8 @@
     "transfer": "tsx src/scripts/transfer.ts",
     "get-blizzard-staking": "tsx src/scripts/lst/get-blizzard-staking.ts",
     "claim-fees": "tsx src/scripts/lst/claim-fees.ts",
-    "query-exchange-rates": "tsx src/scripts/lst/query-exchange-rates.ts"
+    "query-exchange-rates": "tsx src/scripts/lst/query-exchange-rates.ts",
+    "transmute": "tsx src/scripts/lst/transmute.ts"
   },
   "keywords": [],
   "license": "ISC",

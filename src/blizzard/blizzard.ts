@@ -29,6 +29,7 @@ import {
   SyncExchangeRateArgs,
   ToLstAtEpochArgs,
   ToWalAtEpochArgs,
+  TransmuteArgs,
   UpdateMetadataArgs,
   VectorTransferStakedWalArgs,
   ViewFcfsArgs,
@@ -37,6 +38,7 @@ import {
   INNER_LST_STATE_ID,
   INNER_LST_TREASURY_CAP,
   INNER_WALRUS_STAKING_ID,
+  SHARED_OBJECTS,
 } from './constants';
 import { SDK } from './sdk';
 import { ID, IX, OptionU64 } from './structs';
@@ -626,7 +628,7 @@ export class BlizzardSDK extends SDK {
 
     invariant(type, 'Invalid Blizzard Staking: no type found');
 
-    return type;
+    return normalizeStructTag(type);
   }
 
   public async toWalAtEpoch({
@@ -974,6 +976,53 @@ export class BlizzardSDK extends SDK {
           adminWitness,
           this.getAllowedVersions(tx),
         ],
+      }),
+    };
+  }
+
+  public async transmute({
+    tx = new Transaction(),
+    withdrawIXs,
+    fromBlizzardStaking,
+    fromCoin,
+  }: TransmuteArgs) {
+    const fromBlizzardStakingId =
+      typeof fromBlizzardStaking === 'string'
+        ? fromBlizzardStaking
+        : fromBlizzardStaking.objectId;
+
+    this.assertObjectId(fromBlizzardStaking);
+
+    this.assertObjectId(fromCoin);
+
+    const lstType = await this.maybeFetchAndCacheLstType(fromBlizzardStaking);
+
+    const wWalStaking = SHARED_OBJECTS.WWAL_STAKING({ mutable: true });
+
+    invariant(
+      normalizeSuiObjectId(fromBlizzardStakingId) !==
+        normalizeSuiObjectId(wWalStaking.objectId),
+      'Cannot transmute from wWAL'
+    );
+
+    return {
+      tx,
+      returnValues: tx.moveCall({
+        package: this.packages.BLIZZARD.latest,
+        module: this.modules.Protocol,
+        function: 'transmute',
+        arguments: [
+          this.sharedObject(tx, fromBlizzardStaking),
+          this.sharedObject(tx, wWalStaking),
+          this.sharedObject(
+            tx,
+            SHARED_OBJECTS.WALRUS_STAKING({ mutable: true })
+          ),
+          this.ownedObject(tx, fromCoin),
+          withdrawIXs,
+          this.getAllowedVersions(tx),
+        ],
+        typeArguments: [lstType],
       }),
     };
   }
